@@ -1,0 +1,223 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ProviderProfile {
+  userId       String   @id
+  user         User     @relation(fields: [userId], references: [id])
+  businessName String
+  description  String?
+  logo         String
+  address      String
+  slug         String   @unique
+  city         String
+  deliveryFee  Decimal
+  openingTime  String
+  closingTime  String
+  isVerified   Boolean  @default(false)
+  coverImage   String?
+  isOpen       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+  meals        Meal[]
+
+  @@index([businessName])
+  @@index([city, isVerified])
+  @@map("provider")
+}
+
+model Meal {
+  id              Int             @id @default(autoincrement())
+  name            String
+  providerId      String
+  provider        ProviderProfile @relation(fields: [providerId], references: [userId])
+  description     String?
+  image           String
+  foodTags        String[]
+  price           Decimal
+  preparationTime String
+  ingredients     String[]
+  calories        Int?
+  isAvailable     MealStatus      @default(ACTIVE)
+  deletedAt       DateTime?
+  isFeatured      Boolean         @default(false)
+  averageRating   Float           @default(0)
+  ratingCount     Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  categoryId      Int
+  category        Category        @relation(fields: [categoryId], references: [id])
+  orderItems      OrderItem[]
+  reviews         Review[]
+
+  @@index([providerId, isAvailable])
+  @@map("meal")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  image     String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  meals     Meal[]
+
+  @@map("category")
+}
+
+model Order {
+  id              Int             @id @default(autoincrement())
+  totalAmount     Float
+  orderAt         DateTime        @default(now())
+  deliveredAt     DateTime?
+  deliveryAddress String
+  status          orderStatus     @default(PENDING)
+  phone           String
+  paymentMethod   PaymentMethod   @default(CASH_ON_DELIVERY)
+  providerId      String
+  provider        ProviderProfile @relation(fields: [providerId], references: [userId])
+  orderItems      OrderItem[]
+  createdAt       DateTime        @default(now())
+
+  @@index([status, providerId])
+  @@map("order")
+}
+
+model OrderItem {
+  id        Int   @id @default(autoincrement())
+  orderId   Int
+  order     Order @relation(fields: [orderId], references: [id])
+  mealId    Int
+  meal      Meal  @relation(fields: [mealId], references: [id])
+  quantity  Int
+  unitPrice Float
+
+  @@index([orderId, mealId])
+  @@map("orderItem")
+}
+
+model Review {
+  id        Int          @id @default(autoincrement())
+  mealId    Int
+  meal      Meal         @relation(fields: [mealId], references: [id])
+  comment   String?
+  rating    Float
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  parentId  Int?
+  parent    Review?      @relation("ReviewReplies", fields: [parentId], references: [id])
+  replies   Review[]     @relation("ReviewReplies")
+  status    ReviewStatus @default(PENDING)
+
+  @@index([mealId, status])
+  @@map("review")
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  ONLINE
+  CARD
+  MOBILE_BANKING
+}
+
+enum orderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum MealStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id               String           @id
+  name             String
+  email            String
+  emailVerified    Boolean          @default(false)
+  image            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  providerProfiles ProviderProfile?
+
+  role   String? @default("USER")
+  phone  String?
+  status String? @default("ACTIVE")
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
