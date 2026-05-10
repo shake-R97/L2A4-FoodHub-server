@@ -11,5 +11,16 @@ router.post(
     mealControllers.mealPost
  )
 
+ router.put(
+    "/update/:id",
+    auth(Role.PROVIDER , Role.ADMIN),
+    mealControllers.mealUpdate
+ )
+
+ router.delete(
+    "/delete/:id",
+    auth(Role.ADMIN, Role.PROVIDER)
+ )
+
 
 export const mealRoutes = router;

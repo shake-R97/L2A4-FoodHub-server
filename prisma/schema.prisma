@@ -49,7 +49,7 @@ model Meal {
   preparationTime String
   ingredients     String[]
   calories        Int?
-  isAvailable     MealStatus      @default(ACTIVE)
+  isAvailable     MealStatus      @default(TRUE)
   deletedAt       DateTime?
   isFeatured      Boolean         @default(false)
   averageRating   Float           @default(0)
@@ -143,9 +143,8 @@ enum orderStatus {
 }
 
 enum MealStatus {
-  ACTIVE
-  INACTIVE
-  ARCHIVED
+  TRUE
+  FALSE
 }
 
 enum ReviewStatus {

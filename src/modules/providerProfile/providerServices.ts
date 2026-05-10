@@ -12,13 +12,27 @@ const providerProfileCreate = async (providerData: ProviderInput, userId: string
         throw new Error("Provider already exist! you cannot create another")
     }
 
-    const result = await prisma.providerProfile.create({
-        data: {
-            ...providerData,
-            userId,
-            isVerified: false,
-            isOpen: true
-        }
+    const result = await prisma.$transaction(async (tx) => {
+
+        const providerCreate = await tx.providerProfile.create({
+            data: {
+                ...providerData,
+                userId,
+                isVerified: false,
+                isOpen: true
+            }
+        });
+
+        await tx.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                role: "PROVIDER"
+            }
+        });
+        
+        return providerCreate
     })
 
     return result;
@@ -78,7 +92,7 @@ const getAllProviders = async (
         },)
     }
 
-    if(providerUserId){
+    if (providerUserId) {
         andConditions.push({
             userId: providerUserId
         })
@@ -92,7 +106,7 @@ const getAllProviders = async (
             AND: andConditions
         },
         orderBy: {
-            [sortBy] : orderBy
+            [sortBy]: orderBy
         }
     });
 
@@ -118,14 +132,14 @@ const getAllProviders = async (
 }
 
 const getProviderById = async (id: string) => {
-    
+
     const result = await prisma.providerProfile.findUnique({
-        where : {
+        where: {
             userId: id
         }
     })
 
-    if(!result){
+    if (!result) {
         throw new Error(`No Provider Profile Exist with id: ${id}`)
     }
 

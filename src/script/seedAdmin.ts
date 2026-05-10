@@ -7,10 +7,10 @@ async function seedAdmin() {
         console.log("---------Admin Seeding Started---------");
         // admin data
         const adminData = {
-            name : "Admin9",
-            email: "admin9@gmail.com",
+            name : "Admin1",
+            email: "admin1@gmail.com",
             role: Role.ADMIN,
-            password: "999ADMIN999"
+            password: "111ADMIN999"
         }
         
         console.log("---------Checking Admin Exist Or Not--------");
