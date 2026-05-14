@@ -10,6 +10,7 @@ export type OrderPayload = {
     deliveryAddress: string;
     phone: string;
     paymentMethod : PaymentMethod;
+    userId: string;
 }
 
 export type OrderItemData = {

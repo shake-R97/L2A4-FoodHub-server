@@ -6,6 +6,7 @@ import { providerRoutes } from "./modules/providerProfile/providerRoutes";
 import { mealRoutes } from "./modules/meals/mealsRoutes";
 import { userRoutes } from "./modules/user/userRoutes";
 import { orderRoutes } from "./modules/orders/ordersRoutes";
+import { reviewRoutes } from "./modules/reviews/reviewsRoutes";
 
 const app = express()
 
@@ -30,6 +31,9 @@ app.use("/meal", mealRoutes)
 
 // order routes
 app.use("/order", orderRoutes)
+
+// review routes
+app.use("/review", reviewRoutes)
 
 app.get('/', (req, res) => {
   res.send('Hello World From Foodhub Server!')

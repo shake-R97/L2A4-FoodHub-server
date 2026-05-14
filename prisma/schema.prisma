@@ -86,6 +86,8 @@ model Order {
   status          orderStatus     @default(PENDING)
   phone           String
   paymentMethod   PaymentMethod   @default(CASH_ON_DELIVERY)
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
   providerId      String
   provider        ProviderProfile @relation(fields: [providerId], references: [userId])
   orderItems      OrderItem[]
@@ -110,16 +112,18 @@ model OrderItem {
 
 model Review {
   id        Int          @id @default(autoincrement())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
   mealId    Int
   meal      Meal         @relation(fields: [mealId], references: [id])
   comment   String?
-  rating    Float
+  rating    Float?
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
   parentId  Int?
   parent    Review?      @relation("ReviewReplies", fields: [parentId], references: [id])
   replies   Review[]     @relation("ReviewReplies")
-  status    ReviewStatus @default(PENDING)
+  status    ReviewStatus @default(APPROVED)
 
   @@index([mealId, status])
   @@map("review")
@@ -165,9 +169,11 @@ model User {
   accounts         Account[]
   providerProfiles ProviderProfile?
 
-  role   String? @default("USER")
-  phone  String?
-  status String? @default("ACTIVE")
+  role    String?  @default("USER")
+  phone   String?
+  status  String?  @default("ACTIVE")
+  reviews Review[]
+  orders  Order[]
 
   @@unique([email])
   @@map("user")

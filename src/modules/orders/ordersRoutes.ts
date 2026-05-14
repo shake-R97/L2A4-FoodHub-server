@@ -12,6 +12,18 @@ router.post(
     orderController.orderCreate
 )
 
+router.get(
+    "/providerId/:id",
+    auth(Role.ADMIN , Role.PROVIDER),
+    orderController.getOrderByProviderId
+)
+
+router.put(
+    "/update/:id",
+    auth(Role.ADMIN , Role.PROVIDER),
+    orderController.updateOrderData
+)
+
 
 
 
